@@ -1,104 +1,137 @@
-// Version 2.1
+// Version 3.1
+// UseCase3InventorySetup.java
+// Demonstrates centralized room inventory management using HashMap
 
-// Abstract class representing a generic Room
+import java.util.HashMap;
+
+// Abstract Room class (from Use Case 2)
 abstract class Room {
-    private String roomType;
+    private String type;
     private int beds;
-    private double size; // in square meters
-    private double price; // per night
+    private double price;
 
-    // Constructor
-    public Room(String roomType, int beds, double size, double price) {
-        this.roomType = roomType;
+    public Room(String type, int beds, double price) {
+        this.type = type;
         this.beds = beds;
-        this.size = size;
         this.price = price;
     }
 
-    // Getters
-    public String getRoomType() {
-        return roomType;
+    public String getType() {
+        return type;
     }
 
     public int getBeds() {
         return beds;
     }
 
-    public double getSize() {
-        return size;
-    }
-
     public double getPrice() {
         return price;
     }
 
-    // Abstract method to display room details
     public abstract void displayDetails();
 }
 
-// Concrete class for Single Room
+// Concrete Room classes
 class SingleRoom extends Room {
-    public SingleRoom() {
-        super("Single Room", 1, 20.0, 50.0);
+    public SingleRoom(double price) {
+        super("Single Room", 1, price);
     }
 
     @Override
     public void displayDetails() {
-        System.out.println(getRoomType() + ": " + getBeds() + " bed, " + getSize() + " sqm, $" + getPrice() + " per night");
+        System.out.println(getType() + " | Beds: " + getBeds() + " | Price: $" + getPrice());
     }
 }
 
-// Concrete class for Double Room
 class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super("Double Room", 2, 35.0, 90.0);
+    public DoubleRoom(double price) {
+        super("Double Room", 2, price);
     }
 
     @Override
     public void displayDetails() {
-        System.out.println(getRoomType() + ": " + getBeds() + " beds, " + getSize() + " sqm, $" + getPrice() + " per night");
+        System.out.println(getType() + " | Beds: " + getBeds() + " | Price: $" + getPrice());
     }
 }
 
-// Concrete class for Suite Room
 class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super("Suite Room", 3, 60.0, 150.0);
+    public SuiteRoom(double price) {
+        super("Suite Room", 3, price);
     }
 
     @Override
     public void displayDetails() {
-        System.out.println(getRoomType() + ": " + getBeds() + " beds, " + getSize() + " sqm, $" + getPrice() + " per night");
+        System.out.println(getType() + " | Beds: " + getBeds() + " | Price: $" + getPrice());
     }
 }
 
-// Main class to initialize rooms and availability
+// Centralized Inventory Management
+class RoomInventory {
+    private HashMap<String, Integer> inventory;
+
+    public RoomInventory() {
+        inventory = new HashMap<>();
+    }
+
+    // Register a room type with initial availability
+    public void addRoomType(String roomType, int count) {
+        inventory.put(roomType, count);
+    }
+
+    // Get available count for a room type
+    public int getAvailability(String roomType) {
+        return inventory.getOrDefault(roomType, 0);
+    }
+
+    // Update availability after booking or cancellation
+    public void updateAvailability(String roomType, int change) {
+        int current = inventory.getOrDefault(roomType, 0);
+        inventory.put(roomType, current + change);
+    }
+
+    // Display current inventory state
+    public void displayInventory() {
+        System.out.println("\nCurrent Room Inventory:");
+        for (String roomType : inventory.keySet()) {
+            System.out.println(roomType + " | Available: " + inventory.get(roomType));
+        }
+    }
+}
+
+// Main Application
 public class BookMyStayApp {
-    // Static availability variables
-    static int singleRoomAvailable = 5;
-    static int doubleRoomAvailable = 3;
-    static int suiteRoomAvailable = 2;
-
     public static void main(String[] args) {
-        System.out.println("Welcome to Book My Stay App - Version 2.1");
-        System.out.println("-----------------------------------------");
+        System.out.println("Welcome to Book My Stay App (Use Case 3.1)\n");
 
-        // Create room objects
-        Room single = new SingleRoom();
-        Room doubleR = new DoubleRoom();
-        Room suite = new SuiteRoom();
+        // Initialize room objects
+        Room singleRoom = new SingleRoom(100.0);
+        Room doubleRoom = new DoubleRoom(180.0);
+        Room suiteRoom = new SuiteRoom(300.0);
+
+        // Initialize centralized inventory
+        RoomInventory inventory = new RoomInventory();
+        inventory.addRoomType(singleRoom.getType(), 5);
+        inventory.addRoomType(doubleRoom.getType(), 3);
+        inventory.addRoomType(suiteRoom.getType(), 2);
 
         // Display room details
-        single.displayDetails();
-        System.out.println("Available: " + singleRoomAvailable);
+        singleRoom.displayDetails();
+        doubleRoom.displayDetails();
+        suiteRoom.displayDetails();
 
-        doubleR.displayDetails();
-        System.out.println("Available: " + doubleRoomAvailable);
+        // Display current inventory
+        inventory.displayInventory();
 
-        suite.displayDetails();
-        System.out.println("Available: " + suiteRoomAvailable);
+        // Example of updating inventory
+        System.out.println("\nBooking 1 Single Room...");
+        inventory.updateAvailability(singleRoom.getType(), -1);
 
-        System.out.println("-----------------------------------------");
-        System.out.println("Application terminated.");
+        System.out.println("Booking 2 Suite Rooms...");
+        inventory.updateAvailability(suiteRoom.getType(), -2);
+
+        // Display updated inventory
+        inventory.displayInventory();
+
+        System.out.println("\nThank you for using Book My Stay App!");
     }
 }
